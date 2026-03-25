@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Notice Generator</title>
+    <style>
+        body {
+            font-family: Arial;
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        input, textarea, button {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+        }
+
+        button {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        #notice {
+            margin-top: 30px;
+            padding: 20px;
+            border: 0px solid #000;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .right {
+            text-align: right;
+            margin-top: 50px;
+        }
+
+        img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #notice, #notice * {
+                visibility: visible;
+            }
+            #notice {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>Notice Generator - IT Department</h2>
+
+<label>Class</label>
+<input type="text" id="class" placeholder="SEIT / TEIT / BEIT">
+
+<label>Notice Content</label>
+<textarea id="content"></textarea>
+
+<button onclick="generateNotice()">Generate Notice</button>
+<button onclick="printNotice()">Download PDF</button>
+
+<!-- Notice Output -->
+<div id="notice" style="display:none;">
+
+    <!-- 🔹 Hardcoded Banner Image -->
+    <img src="banner.jpg" alt="Banner">
+
+    <!-- OR use online image -->
+    <!-- <img src="https://via.placeholder.com/1200x200"> -->
+
+
+    <br>
+
+    <p class="center"><b id="noticeTitle"></b></p>
+
+    <br>
+    <br>
+    <br>
+    <br>
+
+    <p id="noticeContent"></p>
+
+    <div class="right">
+        <b>HOD-IT</b><br>
+        Prof. Rahul M. Samant
+    </div>
+</div>
+
+<script>
+function generateNotice() {
+    let className = document.getElementById("class").value;
+    let content = document.getElementById("content").value;
+
+    document.getElementById("noticeTitle").innerText = "NOTICE (" + className + ")";
+    document.getElementById("noticeContent").innerText = content;
+
+    document.getElementById("notice").style.display = "block";
+}
+
+function printNotice() {
+    window.print();
+}
+</script>
+
+</body>
+</html>
