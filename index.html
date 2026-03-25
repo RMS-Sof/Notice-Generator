@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Notice Generator</title>
-    <style>
-        body {
-            font-family: Arial;
-            max-width: 800px;
-            margin: auto;
-            padding: 20px;
-        }
+    <title>AI Notice Generator</title>
 
-        h2 {
-            text-align: center;
-        }
+    <!-- TensorFlow + USE -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.18.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.3"></script>
+
+    <style>
+        body { font-family: Arial; max-width: 900px; margin: auto; padding: 20px; }
+        h2 { text-align: center; }
 
         input, textarea, button {
             width: 100%;
@@ -29,17 +26,17 @@
 
         #notice {
             margin-top: 30px;
-            padding: 20px;
-            border: 0px solid #000;
+            padding: 25px;
+            border: 1px solid #000;
         }
 
-        .center {
-            text-align: center;
-        }
+        .center { text-align: center; }
+        .date { text-align: left; margin-top: 10px; }
 
-        .right {
+        .signature {
             text-align: right;
             margin-top: 50px;
+            margin-right: 40px;
         }
 
         img {
@@ -48,18 +45,23 @@
             object-fit: cover;
         }
 
+        #chatBox {
+            border:1px solid #ccc;
+            padding:10px;
+            height:180px;
+            overflow:auto;
+            margin-top:20px;
+        }
+
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            #notice, #notice * {
-                visibility: visible;
-            }
+            body * { visibility: hidden; }
+            #notice, #notice * { visibility: visible; }
             #notice {
                 position: absolute;
                 top: 0;
                 left: 0;
                 width: 100%;
+                border: none;
             }
         }
     </style>
@@ -67,57 +69,183 @@
 
 <body>
 
-<h2>Notice Generator - IT Department</h2>
+<h2>AI Notice Generator - IT Department</h2>
 
-<label>Class</label>
 <input type="text" id="class" placeholder="SEIT / TEIT / BEIT">
+<input type="date" id="dateInput">
 
-<label>Notice Content</label>
-<textarea id="content"></textarea>
+<textarea id="content" rows="5" placeholder="Type or speak notice..."></textarea>
 
+<button onclick="startVoice()">🎤 Speak</button>
+<button onclick="autoFormat()">🧠 Auto Format</button>
 <button onclick="generateNotice()">Generate Notice</button>
-<button onclick="printNotice()">Download PDF</button>
+<button onclick="window.print()">Download PDF</button>
 
-<!-- Notice Output -->
+<!-- NOTICE -->
 <div id="notice" style="display:none;">
+    <img src="banner.jpg">
 
-    <!-- 🔹 Hardcoded Banner Image -->
-    <img src="banner.jpg" alt="Banner">
+    <div class="date" id="date"></div>
 
-    <!-- OR use online image -->
-    <!-- <img src="https://via.placeholder.com/1200x200"> -->
-
-
+    <br><br><br><br>
+    <p class="center"><b id="title"></b></p>
     <br>
+    <p id="finalContent"></p>
 
-    <p class="center"><b id="noticeTitle"></b></p>
-
-    <br>
-    <br>
-    <br>
-    <br>
-
-    <p id="noticeContent"></p>
-
-    <div class="right">
+    <div class="signature">
         <b>HOD-IT</b><br>
         Prof. Rahul M. Samant
     </div>
 </div>
 
+<!-- CHATBOT -->
+<h3>AI Assistant</h3>
+<div id="chatBox"></div>
+<input id="chatInput" placeholder="e.g. exam notice SEIT tomorrow 10 am">
+<button onclick="sendMessage()">Send</button>
+<button onclick="insertToNotice()">Insert to Notice</button>
+
 <script>
-function generateNotice() {
-    let className = document.getElementById("class").value;
-    let content = document.getElementById("content").value;
+let useModel;
+let kb = [
+    "exam notice",
+    "assignment notice",
+    "meeting notice",
+    "holiday notice",
+    "presentation notice"
+];
+let kbEmbeddings;
+let lastAIOutput = "";
 
-    document.getElementById("noticeTitle").innerText = "NOTICE (" + className + ")";
-    document.getElementById("noticeContent").innerText = content;
+// Load model
+async function initAI() {
+    useModel = await use.load();
+    kbEmbeddings = await useModel.embed(kb);
+    logChat("AI ready.");
+}
+initAI();
 
-    document.getElementById("notice").style.display = "block";
+// Chat UI
+function logChat(msg, sender="AI") {
+    let box = document.getElementById("chatBox");
+    box.innerHTML += "<p><b>" + sender + ":</b> " + msg + "</p>";
+    box.scrollTop = box.scrollHeight;
 }
 
-function printNotice() {
-    window.print();
+// Cosine similarity
+function cosineSim(a, b) {
+    return tf.tidy(() => {
+        const dot = tf.sum(tf.mul(a, b), 1);
+        const norma = tf.norm(a, "euclidean", 1);
+        const normb = tf.norm(b, "euclidean", 1);
+        return dot.div(norma.mul(normb));
+    });
+}
+
+// Extract info
+function extract(text) {
+    text = text.toLowerCase();
+
+    let cls = "";
+    if (text.includes("seit")) cls = "SEIT";
+    if (text.includes("teit")) cls = "TEIT";
+    if (text.includes("beit")) cls = "BEIT";
+
+    let date = text.includes("tomorrow") ? "tomorrow" :
+               text.includes("today") ? "today" : "";
+
+    let timeMatch = text.match(/(\d{1,2}\s?(am|pm))/);
+    let time = timeMatch ? timeMatch[0] : "";
+
+    return {cls, date, time};
+}
+
+// Generate formatted notice
+function generateText(intent, userText) {
+    let {cls, date, time} = extract(userText);
+
+    let base = "This is to inform all students that ";
+
+    if (intent.includes("exam"))
+        base += "the internal examination will be conducted";
+    else if (intent.includes("assignment"))
+        base += "the assignment submission is scheduled";
+    else if (intent.includes("meeting"))
+        base += "a meeting has been scheduled";
+    else if (intent.includes("holiday"))
+        base += "the department will remain closed";
+    else
+        base += userText;
+
+    if (cls) base += " for " + cls + " students";
+    if (date) base += " " + date;
+    if (time) base += " at " + time.toUpperCase();
+
+    base += ". All students must comply.";
+
+    return base;
+}
+
+// Chat send
+async function sendMessage() {
+    let input = document.getElementById("chatInput").value;
+    logChat(input, "You");
+
+    let emb = await useModel.embed([input]);
+    let sims = cosineSim(emb, kbEmbeddings);
+    let vals = await sims.data();
+
+    let idx = vals.indexOf(Math.max(...vals));
+    let intent = kb[idx];
+
+    let response = generateText(intent, input);
+
+    lastAIOutput = response;
+    logChat(response);
+
+    document.getElementById("chatInput").value = "";
+}
+
+// Insert into textarea
+function insertToNotice() {
+    document.getElementById("content").value = lastAIOutput;
+}
+
+// Voice input
+function startVoice() {
+    let rec = new webkitSpeechRecognition();
+    rec.lang = "en-IN";
+    rec.start();
+
+    rec.onresult = function(e) {
+        document.getElementById("content").value += " " + e.results[0][0].transcript;
+    };
+}
+
+// Simple formatter
+function autoFormat() {
+    let text = document.getElementById("content").value;
+    document.getElementById("content").value =
+        "This is to inform all students that " + text + ". All students must comply.";
+}
+
+// Generate notice
+function generateNotice() {
+    let cls = document.getElementById("class").value;
+    let content = document.getElementById("content").value;
+    let dateInput = document.getElementById("dateInput").value;
+
+    document.getElementById("title").innerText = "NOTICE (" + cls + ")";
+    document.getElementById("finalContent").innerText = content;
+
+    let d = dateInput ? new Date(dateInput) : new Date();
+
+    document.getElementById("date").innerText =
+        "Date: " + d.toLocaleDateString('en-IN', {
+            day:'2-digit', month:'long', year:'numeric'
+        });
+
+    document.getElementById("notice").style.display = "block";
 }
 </script>
 
