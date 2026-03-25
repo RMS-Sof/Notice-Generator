@@ -71,10 +71,10 @@
 
 <h2>AI Notice Generator - IT Department</h2>
 
-<input type="text" id="class" placeholder="SEIT / TEIT / BEIT">
+<input type="text" id="class" placeholder="SEIT / TEIT / BEIT (Brief Topic)">
 <input type="date" id="dateInput">
 
-<textarea id="content" rows="5" placeholder="Type or speak notice..."></textarea>
+<textarea id="content" rows="10" placeholder="Type or speak notice..."></textarea>
 
 <button onclick="startVoice()">🎤 Speak</button>
 <button onclick="autoFormat()">🧠 Auto Format</button>
@@ -109,9 +109,9 @@
 let useModel;
 let kb = [
     "exam notice",
-    "assignment notice",
-    "meeting notice",
-    "holiday notice",
+    "submission notice",
+    "mid-term submission notice",
+    "project review notice",
     "presentation notice"
 ];
 let kbEmbeddings;
