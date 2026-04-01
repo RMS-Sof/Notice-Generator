@@ -87,7 +87,7 @@
 
     <div class="date" id="date"></div>
 
-    <br><br><br><br>
+    <br><br><br>
     <p class="center"><b id="title"></b></p>
     <br>
     <p id="finalContent"></p>
@@ -112,7 +112,8 @@ let kb = [
     "submission notice",
     "mid-term submission notice",
     "project review notice",
-    "presentation notice"
+    "presentation notice",
+    "mini project notice"
 ];
 let kbEmbeddings;
 let lastAIOutput = "";
@@ -177,8 +178,7 @@ function generateText(intent, userText) {
     else if (intent.includes("project review"))
         base += "BE Project Stage- <<I/II> review (I/II/III/IV) is scheduled on DAY, DATE/MONTH/YEAR. All students must approve their report/presentation before the review. The venue is Seminar Hall of IT Department. Time slot is 9 AM to 1 PM. At least two group members must be present for the review. Absent students to take prior written permission.";
 	else if(intent.includes("Mini project"))
-	base+="SEIT E-commerce Mini Project presentation is scheduled on <<DAY, Date/Month/Year>>. 
-All students must approve their report/presentation before the review.The venue is Seminar Hall of IT Department.Time slot is 9 AM to 1 PM.All group members must be present for the review. Absent students to take prior written permission.";
+	base+="SEIT E-commerce Mini Project presentation is scheduled on <<DAY, Date/Month/Year>>.All students must approve their report/presentation before the review.The venue is Seminar Hall of IT Department.Time slot is 9 AM to 1 PM.All group members must be present for the review. Absent students to take prior written permission.";
     else
         base += userText;
 
