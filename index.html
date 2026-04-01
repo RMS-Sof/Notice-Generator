@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.3"></script>
 
     <style>
-        body { font-family: "Times New Roman", Times, serif; font-size: 25px; max-width: 900px; margin: auto; padding: 20px; }
+        body { font-family: Arial; max-width: 900px; margin: auto; padding: 20px; }
         h2 { text-align: center; }
 
         input, textarea, button {
@@ -71,10 +71,10 @@
 
 <h2>AI Notice Generator - IT Department</h2>
 
-<input type="text" id="class" placeholder="SEIT / TEIT / BEIT (Brief Topic)">
+<input type="text" id="class" placeholder="SEIT / TEIT / BEIT">
 <input type="date" id="dateInput">
 
-<textarea id="content" rows="10" placeholder="Type or speak notice..."></textarea>
+<textarea id="content" rows="5" placeholder="Type or speak notice..."></textarea>
 
 <button onclick="startVoice()">🎤 Speak</button>
 <button onclick="autoFormat()">🧠 Auto Format</button>
@@ -109,9 +109,9 @@
 let useModel;
 let kb = [
     "exam notice",
-    "submission notice",
-    "mid-term submission notice",
-    "project review notice",
+    "assignment notice",
+    "meeting notice",
+    "holiday notice",
     "presentation notice"
 ];
 let kbEmbeddings;
@@ -164,21 +164,16 @@ function extract(text) {
 function generateText(intent, userText) {
     let {cls, date, time} = extract(userText);
 
-    let base = "All students are hereby informed that ";
+    let base = "This is to inform all students that ";
 
-    if (intent.includes("mock practical"))
-        base += "the internal mock practical examination will be conducted for the <<subject - >> on date << DAY, DATE/MONTH/YEAR>>. Time slot is 9 AM to 5 PM. The venue is <<LAB>>.Attendance is compulsory.";
-    else if (intent.includes("mid-term"))
-        base += "Mid-Term submission for all Practical Subjects is scheduled in the week << DATE1 to DATE2>>. All students must perform and submit at least half of the total journal assignments. Journals must be submitted with index page, front page, write-up and output printout.You need to take written permission in case you can't submit your journal in person.";
-    else if (intent.includes("exam"))
-        base += " << Unit Test / CCE Test / Prelim >> is scheduled on << date1 to date 2>>. The time-table is as follows .<< Day,Date / Subject / Venue>>. Attendance is compulsory. ";
-    else if (intent.includes("submission"))
-        base += "FINAL submission for all Practical Subjects is scheduled in the week << DATE1 to DATE2.>> All the students must perform and submit all journal assignments given in the SPPU syllabus. Journals  must be submitted in a college file with index page, Certificate , front page for every assignment , write-up for every assignment  and output printout for all applicable assignments. You need to take written permission in case you can't submit your journal in person.";
-    else if (intent.includes("project review"))
-        base += "BE Project Stage- <<I/II> review (I/II/III/IV) is scheduled on DAY, DATE/MONTH/YEAR. All students must approve their report/presentation before the review. The venue is Seminar Hall of IT Department. Time slot is 9 AM to 1 PM. At least two group members must be present for the review. Absent students to take prior written permission.";
-	else if(intent.includes("Mini project"))
-	base+="SEIT E-commerce Mini Project presentation is scheduled on <<DAY, Date/Month/Year>>. 
-All students must approve their report/presentation before the review.The venue is Seminar Hall of IT Department.Time slot is 9 AM to 1 PM.All group members must be present for the review. Absent students to take prior written permission.";
+    if (intent.includes("exam"))
+        base += "the internal examination will be conducted";
+    else if (intent.includes("assignment"))
+        base += "the assignment submission is scheduled";
+    else if (intent.includes("meeting"))
+        base += "a meeting has been scheduled";
+    else if (intent.includes("holiday"))
+        base += "the department will remain closed";
     else
         base += userText;
 
@@ -186,7 +181,7 @@ All students must approve their report/presentation before the review.The venue 
     if (date) base += " " + date;
     if (time) base += " at " + time.toUpperCase();
 
-    base += " All students must comply.";
+    base += ". All students must comply.";
 
     return base;
 }
