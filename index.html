@@ -114,7 +114,7 @@ let kb = [
     "project review notice",
     "presentation notice",
     "mini project notice",
-    "mock practical"
+    "mock practical notice"
 ];
 let kbEmbeddings;
 let lastAIOutput = "";
@@ -178,8 +178,8 @@ function generateText(intent, userText) {
         base += "FINAL submission for all Practical Subjects is scheduled in the week << DATE1 to DATE2.>> All the students must perform and submit all journal assignments given in the SPPU syllabus. Journals  must be submitted in a college file with index page, Certificate , front page for every assignment , write-up for every assignment  and output printout for all applicable assignments. You need to take written permission in case you can't submit your journal in person.";
     else if (intent.includes("project review"))
         base += "BE Project Stage- <<I/II> review (I/II/III/IV) is scheduled on DAY, DATE/MONTH/YEAR. All students must approve their report/presentation before the review. The venue is Seminar Hall of IT Department. Time slot is 9 AM to 1 PM. At least two group members must be present for the review. Absent students to take prior written permission.";
-	else if(intent.includes("Mini project"))
-	base+="SEIT E-commerce Mini Project presentation is scheduled on <<DAY, Date/Month/Year>>.All students must approve their report/presentation before the review.The venue is Seminar Hall of IT Department.Time slot is 9 AM to 1 PM.All group members must be present for the review. Absent students to take prior written permission.";
+	else if(intent.includes("mini project"))
+	base+="SEIT E-commerce Mini Project presentation is scheduled on <<DAY, Date / Month /Year>>.All students must approve their report/presentation before the review.The venue is Seminar Hall of IT Department.Time slot is 9 AM to 1 PM.All group members must be present for the review.Absent students to take prior written permission.";
     else
         base += userText;
 
